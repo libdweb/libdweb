@@ -4,7 +4,6 @@
   "name": "protocol@libdweb",
   "description": "Extension containing libdweb protocol API",
   "permissions": [],
-
   "experiment_apis": {
     "protocol": {
       "schema": "../../src/toolkit/components/extensions/schemas/protocol.json",
@@ -14,7 +13,6 @@
         "script": "../../src/toolkit/components/extensions/child/ext-protocol.js"
       },
       "parent": {
-        "events": ["startup"],
         "scopes": ["addon_parent"],
         "paths": [["protocol"]],
         "script": "../../src/toolkit/components/extensions/parent/ext-protocol.js"

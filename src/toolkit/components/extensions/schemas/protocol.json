@@ -6,69 +6,135 @@
         "$extend": "WebExtensionManifest",
         "properties": {
           "protocol": {
-            "type": "object",
+            "description": "A list of network protocol services that extension provides.",
             "optional": true,
-            "additionalProperties": {
-              "type": "string"
-            }
+            "type": "array",
+            "items": {"$ref": "protocol.ProtocolService"}
           }
         }
+      },
+      {
+        "$extend": "Permission",
+        "choices": [{
+          "type": "string",
+          "enum": [
+            "protocol"
+          ]
+        }]
       }
     ]
   },
   {
     "namespace": "protocol",
-    "description": "Network protocol handler API",
+    "description": "Use the <code>browser.protocol</code> API to register, custom protocol service.",
     "manifest": ["protocol"],
     "//permissions": ["protocol"],
     "types": [
       {
-        "id": "Request",
+        "id": "Scheme",
+        "description": "The protocol scheme.",
+        "choices": [{
+          "type": "string",
+          "enum": [
+            "bitcoin", "dat", "dweb", "geo", "gopher", "im", "ipfs", "ipns", "irc", "ircs", "magnet",
+            "mailto", "mms", "news", "nntp", "sip", "sms", "smsto", "ssb", "ssh",
+            "tel", "urn", "webcal", "wtai", "xmpp"
+          ]
+        }, {
+          "type": "string",
+          "pattern": "^(ext|web)\\+[a-z0-9.+-]+$"
+        }]
+      },
+      {
+        "id": "ProtocolService",
         "type": "object",
-        "description": "An object passed to the protocol handler",
+        "description": "Protocol service provided by an extension.",
         "properties": {
-          "url": {
-            "type": "string",
-            "description": "requested url"
+          "name": {
+            "description": "A user-readable title string for this protocol. It will be displayed to the user in interface objects as needed.",
+            "type": "string"
+          },
+          "scheme": {
+            "description": "The protocol scheme for this protocol, specified as a string. For example, you can register to handle SMS text message links by registering to handle the \"sms\" scheme.",
+            "$ref": "Scheme"
           }
         }
       },
       {
         "id": "ProtocolHandler",
         "type": "function",
-        "description": "Protocol handler",
+        "description": "Protocol handler function used in registration. It is invoked with a corresponding <code>Request</code> each time resource from this protocol is loaded.",
         "async": true,
         "parameters": [
           {
             "name": "request",
-            "$ref": "Request"
+            "description": "<a href='https://developer.mozilla.org/en-US/docs/Web/API/Request'><code>Request</code></a> instance corresponding to the resource being loaded.",
+            "type": "object",
+            "isInstanceOf": "Request"
           }
-        ]
+        ],
+        "returns": {
+          "type": "object",
+          "description": "<a href='https://developer.mozilla.org/en-US/docs/Web/API/Response'><code>Response</code></a> instance corresponding to the passed request",
+          "isInstanceOf": "Response"
+        }
+      },
+      {
+        "id": "ProtocolRegistration",
+        "description": "Object representing protocol registration",
+        "type": "object",
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "description": "The protocol scheme for this registration."
+          },
+          "unregister": {
+            "type": "function",
+            "description": "Unregisters protocol and returns a promise resolved on completion.",
+            "async": true,
+            "parameters": []
+          }
+        }
       }
     ],
-    "functions": [
+    "functions": [],
+    "properties": {},
+    "events": [
       {
-        "name": "registerProtocol",
+        "name": "onRequest",
         "type": "function",
-        "description": "regitruesters network protocol handler",
-        "async": true,
+        "description": "Fired with a corresponding <code>Request</code> each time a resource from this protocol is loaded.",
         "parameters": [
           {
-            "name": "scheme",
-            "type": "string",
-            "description":
-              "The protocol scheme that implementation will handle."
-          },
-          {
-            "name": "handler",
-            "$ref": "ProtocolHandler",
-            "type": "function",
-            "description": "Protocol handler for the registered protocol"
+            "type": "object",
+            "name": "details",
+            "properties": {
+              "request": {
+                "description": "<a href='https://developer.mozilla.org/en-US/docs/Web/API/Request'><code>Request</code></a> instance corresponding to the resource being loaded.",
+                "type": "object",
+                "isInstanceOf": "Request"
+              }
+            }
           }
-        ]
+        ],
+        "extraParameters": [
+          {
+            "name": "scheme",
+            "description": "The protocol scheme for this listener.",
+            "$ref": "Scheme"
+          }
+        ],
+        "returns": {
+          "type": "object",
+          "properties": {
+            "response": {
+              "description": "<a href='https://developer.mozilla.org/en-US/docs/Web/API/Response'><code>Response</code></a> instance corresponding to the passed request",
+              "type": "object",
+              "isInstanceOf": "Response"
+            }
+          }
+        }
       }
-    ],
-    "properties": {},
-    "events": []
+    ]
   }
 ]

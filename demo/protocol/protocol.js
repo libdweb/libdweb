@@ -1,5 +1,6 @@
-browser.protocol.registerProtocol("dweb", request => {
+browser.protocol.onRequest.addListener(request => {
   const examples = ["stream", "async", "crash", "text", "html"]
+  console.log("xxx got request", request.url)
   switch (request.url) {
     case "dweb://stream/": {
       let cancelled = false
@@ -74,4 +75,6 @@ browser.protocol.registerProtocol("dweb", request => {
       })
     }
   }
-})
+}, "dweb")
+
+browser.tabs.create({ url: "dweb://text" })
